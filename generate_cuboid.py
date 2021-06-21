@@ -20,7 +20,7 @@ for i in range(5):
     F3 = (7+c,6+c,2+c,3+c)
     F4 = (4+c,7+c,3+c,0+c)
     f_all.extend([F1,F2,F3,F4])
-del f_all[(len(f_all)-4):]
+del f_all[(len(f_all)-4):] #code produces 4 faces too many, so delete the last 4 faces
 
 verts = v_all
 faces = f_all
