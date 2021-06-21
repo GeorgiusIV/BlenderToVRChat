@@ -1,0 +1,53 @@
+import bpy
+
+# Online Solution 1   ¬  https://blenderartists.org/t/getting-vertices-of-a-vertex-group-from-within-python/584014/6
+def vertex_lister(obj):
+    group_lookup = {g.index: g.name for g in obj.vertex_groups}
+    verts = {name: [] for name in group_lookup.values()}
+    for v in obj.data.vertices:
+        for g in v.groups:
+            verts[group_lookup[g.group]].append(v.index)
+            
+# Online Solution 2   ¬  https://blender.stackexchange.com/questions/75223/finding-vertices-in-a-vertex-group-using-blenders-python-api/75240#75240
+def alternative_vertex_lister(obj):
+    vg_idx = 0
+    obj = bpy.context.object
+    vs = [v for v in obj.data.vertices if vg_idx in [ vg.group for vg in v.groups]]
+
+
+# Begin
+latent_circles = list()
+nested_circles = list()
+thicc = 0.01
+
+class latent_circle:
+    def __init__(self, r, c):
+        self.r = r
+        self.c = c
+
+def recursive_circle(i, r, c):
+    i -= 1
+    if i > 0:
+        recursive_circle(i, r/2, (c[0],c[1]+r,c[2])) # north neighbour
+        recursive_circle(i, r/2, (c[0]+r,c[1],c[2])) # east neighbour
+        recursive_circle(i, r/2, (c[0],c[1]-r,c[2])) # south neighbour
+        recursive_circle(i, r/2, (c[0]-r,c[1],c[2])) # west neighbour
+    latent_circles.append(latent_circle(r, c)) # stores circle parameters for later
+    
+# Main
+recursive_circle(3, 1, (0,0,0))
+
+
+for circle in latent_circles: # generates parameters for the second ring
+    nested_circles.append(latent_circle(circle.r-thicc, circle.c))
+
+for circle in latent_circles: # generates the actual circles for ring 1
+    bpy.ops.mesh.primitive_circle_add(radius = circle.r, location = circle.c)
+
+    # HERE IS WHERE MY PROBLEM IS
+    # I'm just trying to find a list of indices for the circles
+    selected_object = bpy.context.object
+    print(alternative_vertex_lister(selected_object))
+    
+for circle in nested_circles: # generates the actual circles for ring 2
+    bpy.ops.mesh.primitive_circle_add(radius = circle.r, location = circle.c)
