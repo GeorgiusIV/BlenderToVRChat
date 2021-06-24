@@ -1,0 +1,58 @@
+import bpy
+import math
+
+def new_object(object_name, verts, edges=[], faces=[]):
+    # creates new object in the scene from defined parameters
+    mesh = bpy.data.meshes.new(object_name)
+    mesh.from_pydata(verts, edges, faces)
+    object = bpy.data.objects.new(object_name, mesh)
+    bpy.context.collection.objects.link(object)
+    
+def cylinder_coords(phi, end):
+    if phi == end:
+        return 0
+    if phi != end:
+        return phi
+    
+def new_vertices(end, detail):
+    x = lambda theta, phi : 10*math.cos(theta)*math.sin(phi)
+    y = lambda theta, phi : 10*math.sin(theta)*math.sin(phi)
+    z = lambda theta, phi : 10*math.cos(phi)
+    step = end/detail
+    vertices = list()
+    for step_one in range(detail):
+        theta = step_one*step
+        for step_two in range(detail):
+            phi = step_two*step
+            vertices.append((x(theta,phi), y(theta,phi), z(theta,phi)))
+    return vertices
+            
+def outer_edges(verts, detail):
+    edges = list()
+    last_vert = len(verts)
+    
+    #vertical edges
+    for v in range(last_vert):
+        if v > 0 and (v%detail!=0):        
+            edges.append((v-1, v))
+
+    #horizontal edges
+    for v in range(last_vert):
+        if v > detail:
+            edges.append((v-detail, v))
+        elif v < detail:
+            edges.append((last_vert-detail+v, v))
+        else:
+            edges.append((0, detail))
+
+    return edges
+             
+               
+detail = 32
+vertices = new_vertices(2*math.pi, detail)
+edges = outer_edges(vertices, detail)
+new_object("Sphere", vertices, edges, [])
+
+
+#object.location = (0,0,0)
+    
